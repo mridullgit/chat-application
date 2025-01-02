@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="App_Script_body.js"></script>
+    <script async defer src="database.js"></script>
+    <script src = "socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+ 
+</head>
+<body>
+    <div id="login">
+        <input id="username" placeholder="username">
+        <input type="password" id="inppassword" placeholder="password">
+        <button id="loginbtn">Login</button>
+    </div>
+    <div id="chatBox">
+    <h1>Welcome to MChat !</h1>
+    <input id="inpMsg" placeholder="type your message here">
+    <input id="sendto" placeholder="Send To(Default : Everyone)">
+    <button id="btnSend">SEND</button>
+    <ul id="ulMsgList"></ul>
+    </div>
+    <script>
+        let socket = io()
+$('#login').show()
+$('#chatBox').hide()
+$('#loginbtn').click(()=>{
+    socket.emit('login',{
+        username : $('#username').val(),
+        password : $('#inppassword').val()
+    })
+})
+socket.on('logged_in',()=>{
+    $('#login').hide()
+    $('#chatBox').show()
+})
+socket.on('login_failed',()=>{
+    window.alert('Username or Password wrong')
+})
+$('#btnSend').click(()=>{
+    socket.emit('msg_send',{
+        to: $('#sendto').val(),
+        msg: $('#inpMsg').val()
+    })
+    $('#sendto').val("") 
+    $('#inpMsg').val("")
+})
+socket.on('msg_rcvd',(data)=>{
+    $('#ulMsgList').append($('<li>').text(
+       `[${data.from}] : ${data.msg}`
+    ))
+    
+})
+    </script>
+</body>
+</html>
